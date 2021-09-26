@@ -16,7 +16,7 @@ class RecipeAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     exclude = ('key',)
 
-class MachineTypeAdmin(admin.ModelAdmin):
+class BuildableAdmin(admin.ModelAdmin):
     exclude = ('key',)
 
 class NodeTypeAdmin(admin.ModelAdmin):
@@ -26,7 +26,7 @@ class NodeTypeAdmin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(MachineType, MachineTypeAdmin)
+admin.site.register(Buildable, BuildableAdmin)
 #admin.site.register(RecipeInput)
 #admin.site.register(RecipeOutput)
 admin.site.register(NodeType, NodeTypeAdmin)

@@ -1,6 +1,9 @@
 # Database
 db.sqlite3
 
+# Firebase service account
+firebase_serviceaccount.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

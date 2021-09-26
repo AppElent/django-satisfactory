@@ -34,6 +34,8 @@ if environment == 'LOCAL':
 # Ignore warning about oauth scopes
 os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
+# Load firebase json file from path
+os.environ['FIREBASE_CRED'] = './firebase_serviceaccount.json'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -68,6 +70,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'satisfactory',
     'users',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -107,7 +110,7 @@ REST_FRAMEWORK = {
         #'rest_framework_csv.renderers.CSVRenderer',
     ],
     'DEFAULT_FILTER_BACKENDS': (
-        #'django_filters.rest_framework.DjangoFilterBackend',
+        'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
 
@@ -195,3 +198,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 django_heroku.settings(locals())
 options = DATABASES['default'].get('OPTIONS', {})
 options.pop('sslmode', None)
+
+from django.core.cache import cache
+
+print(cache.keys("*"))

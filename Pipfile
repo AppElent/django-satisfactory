@@ -4,6 +4,8 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+requests = "*"
+beautifulsoup4 = "*"
 
 [packages]
 django = "*"
@@ -14,6 +16,7 @@ python-dotenv = "*"
 django-crum = "*"
 django-redis = "*"
 firebase-admin = "*"
+django-filter = "*"
 
 [requires]
 python_version = "3.8"

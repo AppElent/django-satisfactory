@@ -1,13 +1,10 @@
-from threading import stack_size
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
-from crum import get_current_user
-User = get_user_model()
 
 alphanumeric = RegexValidator(r'^[-0-9a-zA-Z ]*$', 'Only alphanumeric characters, spaces or dashes are allowed.')
 
-class MachineType(models.Model):
+class Buildable(models.Model):
+    version = models.CharField(max_length=4)
     displayname = models.CharField(max_length=50,validators=[alphanumeric])
     power_usage = models.IntegerField(default=1)
     image_link = models.CharField(max_length=200, blank=True, null=True)
@@ -28,9 +25,13 @@ class MachineType(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.displayname + ' (' + self.version + ')'
+
+    class Meta:
+        unique_together = ('version', 'displayname',)
 
 class Product(models.Model):
+    version = models.CharField(max_length=4)
     displayname = models.CharField(max_length=50,validators=[alphanumeric])
     default_recipe = models.ForeignKey('Recipe' , on_delete=models.SET_NULL, null=True, blank=True, related_name='default_recipe_products')
     image_link = models.CharField(max_length=200, blank=True, null=True)
@@ -43,21 +44,28 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.displayname + ' (' + self.version + ')'
+
+    class Meta:
+        unique_together = ('version', 'displayname',)
 
 class Recipe(models.Model):
+    version = models.CharField(max_length=4)
     RecipeTypes = models.TextChoices('RecipeType', 'default alternate')
-    name = models.CharField(max_length=50,validators=[alphanumeric])
+    displayname = models.CharField(max_length=50,validators=[alphanumeric])
     type = models.CharField(blank=True, choices=RecipeTypes.choices, max_length=20, default='default')
-    machine = models.ForeignKey(MachineType, on_delete=models.CASCADE, related_name='recipes')
+    machine = models.ForeignKey(Buildable, on_delete=models.CASCADE, related_name='recipes')
     machine_seconds = models.IntegerField(blank=True, null=True)
-    ingredients = models.ManyToManyField(Product, through='RecipeInput', related_name='ingredients_for')
-    products = models.ManyToManyField(Product, through='RecipeOutput',related_name='recipes')
+    ingredients = models.ManyToManyField(Product, through='RecipeInput', related_name='recipe_input')
+    products = models.ManyToManyField(Product, through='RecipeOutput',related_name='recipe_output')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name + ' - ' + self.type
+        return self.displayname + ' - ' + self.type + ' (' + self.version + ')'
+
+    class Meta:
+        unique_together = ('version', 'displayname',)
 
 class RecipeInput(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
@@ -83,6 +91,7 @@ class RecipeOutput(models.Model):
         return self.recipe.name + ' - ' + self.product.name + ' - ' + str(self.amount)
 
 class NodeType(models.Model):
+    version = models.CharField(max_length=4)
     name = models.CharField(max_length=50,validators=[alphanumeric])
     NodeTypes = models.TextChoices('NodeTypes', 'Node Well')
     type = models.CharField(max_length=50, choices=NodeTypes.choices)

@@ -11,7 +11,7 @@ class OptionalSlashRouter(DefaultRouter):
 router = OptionalSlashRouter('/?')
 router.register('recipes', RecipeViewSet, basename='recipes')
 router.register('products', ProductViewSet, basename='products')
-router.register('machinetypes', MachineTypeViewSet, basename='machinetypes')
+router.register('buildables', BuildableViewSet, basename='buildables')
 
 urlpatterns = [
     path('', include(router.urls)),

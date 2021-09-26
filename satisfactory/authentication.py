@@ -7,7 +7,10 @@ import json
 User = get_user_model()
 
 saved_credential = os.getenv("FIREBASE_CRED")
-cred = credentials.Certificate(json.loads(saved_credential))
+try:
+    cred = credentials.Certificate(json.loads(saved_credential))
+except:
+    cred = credentials.Certificate(saved_credential)
 firebase_admin.initialize_app(cred)
 print('Firebase loaded')
 
