@@ -35,7 +35,8 @@ if environment == 'LOCAL':
 os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
 # Load firebase json file from path
-os.environ['FIREBASE_CRED'] = './firebase_serviceaccount.json'
+if environment == 'LOCAL':
+    os.environ['FIREBASE_CRED'] = './firebase_serviceaccount.json'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -198,7 +199,3 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 django_heroku.settings(locals())
 options = DATABASES['default'].get('OPTIONS', {})
 options.pop('sslmode', None)
-
-from django.core.cache import cache
-
-print(cache.keys("*"))
