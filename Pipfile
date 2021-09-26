@@ -17,6 +17,7 @@ django-crum = "*"
 django-redis = "*"
 firebase-admin = "*"
 django-filter = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
