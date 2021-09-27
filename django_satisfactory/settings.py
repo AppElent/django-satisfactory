@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'satisfactory',
     'users',
+    'cache',
     'django_filters',
 ]
 

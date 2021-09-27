@@ -3,33 +3,6 @@ from django.core.validators import RegexValidator
 
 alphanumeric = RegexValidator(r'^[-0-9a-zA-Z ]*$', 'Only alphanumeric characters, spaces or dashes are allowed.')
 
-class Buildable(models.Model):
-    version = models.CharField(max_length=4)
-    displayname = models.CharField(max_length=50,validators=[alphanumeric])
-    power_usage = models.IntegerField(default=1)
-    image_link = models.CharField(max_length=200, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    tier = models.CharField(max_length=200, blank=True, null=True)
-    category = models.CharField(max_length=200, blank=True, null=True)
-    subcategory = models.CharField(max_length=200, blank=True, null=True)
-    power_usage = models.FloatField(blank=True, null=True)
-    overclockable = models.BooleanField(blank=True, null=True)
-    inputs_conveyer = models.IntegerField(blank=True, null=True)
-    outputs_conveyer = models.IntegerField(blank=True, null=True)
-    inputs_pipeline = models.IntegerField(blank=True, null=True)
-    outputs_pipeline = models.IntegerField(blank=True, null=True)
-    size_width = models.IntegerField(blank=True, null=True)
-    size_length = models.IntegerField(blank=True, null=True)
-    size_height = models.IntegerField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.displayname + ' (' + self.version + ')'
-
-    class Meta:
-        unique_together = ('version', 'displayname',)
-
 class Product(models.Model):
     version = models.CharField(max_length=4)
     displayname = models.CharField(max_length=50,validators=[alphanumeric])
@@ -49,6 +22,42 @@ class Product(models.Model):
     class Meta:
         unique_together = ('version', 'displayname',)
 
+class Buildable(models.Model):
+    version = models.CharField(max_length=4)
+    displayname = models.CharField(max_length=50,validators=[alphanumeric])
+    power_usage = models.IntegerField(default=1)
+    image_link = models.CharField(max_length=200, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    tier = models.CharField(max_length=200, blank=True, null=True)
+    category = models.CharField(max_length=200, blank=True, null=True)
+    subcategory = models.CharField(max_length=200, blank=True, null=True)
+    power_usage = models.FloatField(blank=True, null=True)
+    overclockable = models.BooleanField(blank=True, null=True)
+    inputs_conveyer = models.IntegerField(blank=True, null=True)
+    outputs_conveyer = models.IntegerField(blank=True, null=True)
+    inputs_pipeline = models.IntegerField(blank=True, null=True)
+    outputs_pipeline = models.IntegerField(blank=True, null=True)
+    size_width = models.IntegerField(blank=True, null=True)
+    size_length = models.IntegerField(blank=True, null=True)
+    size_height = models.IntegerField(blank=True, null=True)
+    ingredients = models.ManyToManyField(Product, through='BuildableIngredient',related_name='buildables')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.displayname + ' (' + self.version + ')'
+
+    class Meta:
+        unique_together = ('version', 'displayname',)
+
+class BuildableIngredient(models.Model):
+    buildable = models.ForeignKey(Buildable, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    amount = models.IntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class Recipe(models.Model):
     version = models.CharField(max_length=4)
     RecipeTypes = models.TextChoices('RecipeType', 'default alternate')
@@ -58,11 +67,19 @@ class Recipe(models.Model):
     machine_seconds = models.IntegerField(blank=True, null=True)
     ingredients = models.ManyToManyField(Product, through='RecipeInput', related_name='recipe_input')
     products = models.ManyToManyField(Product, through='RecipeOutput',related_name='recipe_output')
+    unlocked = models.BooleanField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.displayname + ' - ' + self.type + ' (' + self.version + ')'
+
+    @property
+    def default_recipe(self):
+        if self.type == 'default':
+            return True
+        else:
+            return False
 
     class Meta:
         unique_together = ('version', 'displayname',)

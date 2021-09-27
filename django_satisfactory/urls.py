@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # All Satisfactory routes
     path('satisfactory/', include('satisfactory.urls')),
+    path('', include('cache.urls')),
 ]
