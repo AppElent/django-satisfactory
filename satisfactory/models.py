@@ -5,7 +5,7 @@ alphanumeric = RegexValidator(r'^[-0-9a-zA-Z ]*$', 'Only alphanumeric characters
 
 class Product(models.Model):
     version = models.CharField(max_length=4)
-    displayname = models.CharField(max_length=50,validators=[alphanumeric])
+    displayname = models.CharField(max_length=100,validators=[alphanumeric])
     default_recipe = models.ForeignKey('Recipe' , on_delete=models.SET_NULL, null=True, blank=True, related_name='default_recipe_products')
     image_link = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -24,7 +24,7 @@ class Product(models.Model):
 
 class Buildable(models.Model):
     version = models.CharField(max_length=4)
-    displayname = models.CharField(max_length=50,validators=[alphanumeric])
+    displayname = models.CharField(max_length=100,validators=[alphanumeric])
     power_usage = models.IntegerField(default=1)
     image_link = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -61,7 +61,7 @@ class BuildableIngredient(models.Model):
 class Recipe(models.Model):
     version = models.CharField(max_length=4)
     RecipeTypes = models.TextChoices('RecipeType', 'default alternate')
-    displayname = models.CharField(max_length=50,validators=[alphanumeric])
+    displayname = models.CharField(max_length=100,validators=[alphanumeric])
     type = models.CharField(blank=True, choices=RecipeTypes.choices, max_length=20, default='default')
     machine = models.ForeignKey(Buildable, on_delete=models.CASCADE, related_name='recipes')
     machine_seconds = models.IntegerField(blank=True, null=True)
