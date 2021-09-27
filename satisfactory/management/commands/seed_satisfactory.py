@@ -1,7 +1,7 @@
 from satisfactory.models import *
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
+from django.db.utils import IntegrityError, DataError
 import random
 import json
 
@@ -51,9 +51,10 @@ def run_seed(self, mode, version):
     # Creating items
     #
     #
-    f = open(f'./satisfactory/seeds/items_{satisfactory_version}.json',)
+    f = open(f'./satisfactory/management/commands/items_{satisfactory_version}.json',)
     items = json.load(f)
     for item in items:
+        print(f"Item {item.get('displayName')} is being added")
         # Setting the stack_size variable to None if some weird error exposes
         try:
             stack_size = int(item.get('stackSize'))
@@ -73,15 +74,16 @@ def run_seed(self, mode, version):
                 sink_value=None if not item.get('sink_value') else int(item.get('sink_value').replace(' ', ''))
             )
         except IntegrityError:
-            print(item.get('displayName'), 'bestond al')
+            print(f"{item.get('displayName')} already exists")
             pass
 
     #
     # Creating buildings
     #
-    f = open(f'./satisfactory/seeds/buildings_{satisfactory_version}.json',)
+    f = open(f'./satisfactory/management/commands/buildings_{satisfactory_version}.json',)
     buildings = json.load(f)
     for building in buildings:
+        print(f"Building {building.get('displayName')} is being added")
         # If there is already an object present in database, skip the line
         try:
             saved_building = Buildable.objects.get(version=satisfactory_version, displayname=building.get('displaynname'))
@@ -91,9 +93,13 @@ def run_seed(self, mode, version):
 
         # Set height variable (dealing with different formats in JSON file)
         try:
-            height = None if '\u2013' in building['size_length'] else float(building['size_length'].replace(' m', ''))
+            height = None if '\u2013' in building['size_height'] else float(building['size_height'].replace(' m', ''))
         except:
             height = None
+        try:
+            length = None if '\u2013' in building['size_length'] else float(building['size_length'].replace(' m', ''))
+        except:
+            length = None
 
         # Try creating object or fail if object already exists
         try:
@@ -112,7 +118,7 @@ def run_seed(self, mode, version):
                 inputs_pipeline=0,
                 outputs_pipeline=0,
                 size_width=None if not building.get('size_width') else float(building.get('size_width').replace(' m', '')),
-                size_length=None if not building.get('size_length') else None if '\u2013' in building['size_length'] else float(building['size_length'].replace(' m', '')),
+                size_length=length,
                 size_height=height
             )
 
@@ -137,10 +143,11 @@ def run_seed(self, mode, version):
     #
     # Create recipes (depends on buildings and products)
     #
-    f = open(f'./satisfactory/seeds/recipes_{satisfactory_version}.json',)
+    f = open(f'./satisfactory/management/commands/recipes_{satisfactory_version}.json',)
     recipes = json.load(f)
     for recipe in recipes:
         recipe['machine'] = recipe.get('machine').replace(' × ', '')
+        print(f'Recipe {recipe.get("recipename")} is being added')
         try:
             created_recipe = Recipe.objects.create(
                 version=satisfactory_version,
@@ -151,6 +158,8 @@ def run_seed(self, mode, version):
             )
         except IntegrityError:
             continue
+        except DataError:
+            print('Recipe cannot be created, something is wrong with data', recipe)
 
         # Creating related entries for product (ingredients). First try to GET a product. If not exists, create it.
         for ingredient in recipe.get('inputs'):
@@ -158,7 +167,7 @@ def run_seed(self, mode, version):
             try:
                 product_object = Product.objects.get(version=satisfactory_version, displayname=productname)
             except ObjectDoesNotExist:
-                print('Product input bestaat niet - ' + productname)
+                print('--> Product input bestaat niet - ' + productname)
                 product_object = Product.objects.create(version=satisfactory_version, displayname=productname)
             created_recipe.ingredients.add(
                 product_object,
@@ -171,7 +180,7 @@ def run_seed(self, mode, version):
             try:
                 product_object = Product.objects.get(version=satisfactory_version, displayname=productname)
             except ObjectDoesNotExist:
-                print('Product output bestaat niet - ' + productname)
+                print('--> Product output bestaat niet - ' + productname)
                 product_object = Product.objects.create(version=satisfactory_version, displayname=productname)
             created_recipe.products.add(
                 product_object,
