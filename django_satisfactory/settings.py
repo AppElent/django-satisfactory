@@ -53,7 +53,11 @@ if environment != "LOCAL":
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost:3000',
+    'satisfactory.appelent.com',
+    'satisfactory-dev.appelent.com'
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
@@ -73,9 +77,12 @@ INSTALLED_APPS = [
     'users',
     'cache',
     'django_filters',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
+
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -116,6 +123,15 @@ REST_FRAMEWORK = {
     ),
 }
 
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000"
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https?://([a-z0-9]+[.])*appelent[.]com",
+    r"^https?://satisfactory-([a-z0-9]+[.])*web[.]app",
+]
 # Setting custom user model
 AUTH_USER_MODEL = 'users.User'
 

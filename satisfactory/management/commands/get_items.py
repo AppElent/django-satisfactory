@@ -149,7 +149,7 @@ def run_command(self, version):
             inputs = []
             outputs = []
             recipe_object = {}
-            recipe_object['recipename'] = recipe[0].replace('Alternate', '')
+            recipe_object['recipename'] = recipe[0].replace('Alternate', '').replace(': ', '')
             recipe
             already_found = next((x for x in recipe_list if x.get('recipename') == recipe_object['recipename']), None)
             if already_found:

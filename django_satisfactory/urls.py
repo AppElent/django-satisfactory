@@ -21,4 +21,5 @@ urlpatterns = [
     # All Satisfactory routes
     path('satisfactory/', include('satisfactory.urls')),
     path('', include('cache.urls')),
+    path("api-auth/", include("rest_framework.urls")),
 ]

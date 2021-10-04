@@ -21,6 +21,7 @@ django-filter = "*"
 gunicorn = "*"
 beautifulsoup4 = "*"
 requests = "*"
+django-cors-headers = "*"
 
 [requires]
 python_version = "3.8"
