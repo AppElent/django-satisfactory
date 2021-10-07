@@ -143,6 +143,10 @@ def run_command(self, version):
             print(f"--->Item {single_item['displayName']} heeft geen recepten of is niet goed gegaan", e)
             continue
         columns = len(recipes[0])
+
+        # Hier moet iets komen zodat hij wel de 2e keer hetzelfde recept toevoegt maar dan alleen ingredienten toevoegen
+        # Ook moet hier het aantal output nog aangegeven worden (of toch niet)
+        recipe_list_current_product = []
         
         for recipe in recipes[1:]:
             current_column = 1
@@ -150,11 +154,16 @@ def run_command(self, version):
             outputs = []
             recipe_object = {}
             recipe_object['recipename'] = recipe[0].replace('Alternate', '').replace(': ', '')
-            recipe
             already_found = next((x for x in recipe_list if x.get('recipename') == recipe_object['recipename']), None)
+            already_found2 = next((x for x in recipe_list_current_product if x.get('recipename') == recipe_object['recipename']), None)
             if already_found:
-                print(f"---> Recipe {already_found['recipename']} is already present")
-                continue
+                if not already_found2:
+                    print(f"---> Recipe {already_found['recipename']} is already present")
+                    continue
+                else:
+                    inputs = already_found2['inputs']
+                    outputs = already_found2['outputs']
+                    recipe_object = already_found2
             recipe_object['alternate'] = True if recipe[0].endswith('Alternate') else False
             previous_column = ''
             for recipecolumn in recipe[1:]:
@@ -162,12 +171,12 @@ def run_command(self, version):
                 current_column = current_column + 1
                 if recipecolumn == previous_column:
                     continue
-                elif column_name == "Building":
+                elif column_name == "Building" and not already_found2:
                     recipemachine = recipecolumn
                     first_digit = re.search(r"\d", recipecolumn).start()
                     recipemachine = recipecolumn[0:first_digit].replace('×', '').strip()
                     recipe_sec = int(recipecolumn[first_digit:].replace(' sec', '').replace(' × ', ''))
-                elif column_name == 'Prerequisites':
+                elif column_name == 'Prerequisites' and not already_found2:
                     recipe_object['prerequisites'] = recipecolumn
                 elif recipecolumn == '\xa0':
                     pass
@@ -181,7 +190,9 @@ def run_command(self, version):
                         recipe_min = None
                         productname = recipeinput[1]
                     productname = productname.replace("\u00a0", "")
-                    inputs.append({"product": productname, "amount": float(recipeinput[0]), "recipe_min": recipe_min})
+                    input_found = next((x for x in inputs if x.get('product') == productname), None)
+                    if not input_found:
+                        inputs.append({"product": productname, "amount": float(recipeinput[0]), "recipe_min": recipe_min})
                 elif column_name == "Products":
                     recipeinput = recipecolumn.split(' × ')
                     try:
@@ -201,14 +212,18 @@ def run_command(self, version):
                         recipe_mj = None
                         productname = recipeinput[1]
                     productname = productname.replace("\u00a0", "")
-                    outputs.append({"product": productname, "amount": float(recipeinput[0]), "recipe_min": recipe_min, "mj": recipe_mj})
+                    output_found = next((x for x in outputs if x.get('product') == productname), None)
+                    if not output_found:
+                        outputs.append({"product": productname, "amount": float(recipeinput[0]), "recipe_min": recipe_min, "mj": recipe_mj})
                 previous_column = recipecolumn
             recipe_object['inputs'] = inputs
             recipe_object['outputs'] = outputs
             recipe_object['machine'] = recipemachine
             recipe_object['machine_seconds'] = recipe_sec
             print(f"---> Recipe {recipe_object['recipename']} is added to the list")
-            recipe_list.append(recipe_object)
+            if not already_found2:
+                recipe_list.append(recipe_object)
+                recipe_list_current_product.append(recipe_object)
 
 
 
